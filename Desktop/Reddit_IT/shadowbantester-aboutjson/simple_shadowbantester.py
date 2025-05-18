@@ -13,12 +13,24 @@ MAX_RETRIES = 3
 
 # Liste von User-Agents für Rotation
 USER_AGENTS = [
+    # Chrome (verschiedene Versionen und Plattformen)
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edge/120.0.0.0',
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    # Firefox
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7; rv:120.0) Gecko/20100101 Firefox/120.0',
+    # Safari
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
+    # Edge
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    # Opera
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 OPR/95.0.0.0',
+    # Googlebot
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    # Bingbot
+    'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
 ]
 
 # Proxy-Handling
@@ -44,12 +56,16 @@ def get_random_user_agent():
 
 # User-Agent Auswahl und Delay-Slider in der UI
 st.sidebar.header("Request Settings")
+rotate_user_agents = st.sidebar.checkbox("User-Agent rotieren (zufällig)", value=True)
 user_agent = st.sidebar.selectbox("User-Agent wählen", USER_AGENTS)
 delay = st.sidebar.slider("Delay zwischen Requests (Sekunden)", min_value=0.1, max_value=5.0, value=0.5, step=0.1)
 
 def is_shadowbanned(username, proxy=None, proxy_index=None):
     url = f"https://www.reddit.com/user/{username}/about.json"
-    headers = {'User-Agent': user_agent}  # Verwende den gewählten User-Agent
+    if rotate_user_agents:
+        headers = {'User-Agent': random.choice(USER_AGENTS)}
+    else:
+        headers = {'User-Agent': user_agent}
     proxy_attempts = 0
     max_proxy_attempts = len(proxies) if proxies else 1
     current_proxy_index = proxy_index if proxy_index is not None else 0
