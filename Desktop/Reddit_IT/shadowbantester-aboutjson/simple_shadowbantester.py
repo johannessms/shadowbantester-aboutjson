@@ -33,6 +33,29 @@ USER_AGENTS = [
     'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
 ]
 
+ACCEPT_HEADERS = [
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'text/html,application/xml;q=0.9,*/*;q=0.8',
+]
+ACCEPT_LANGUAGE_HEADERS = [
+    'en-US,en;q=0.9',
+    'en-GB,en;q=0.8',
+    'de-DE,de;q=0.9,en;q=0.8',
+]
+ACCEPT_ENCODING_HEADERS = [
+    'gzip, deflate, br',
+    'gzip, deflate',
+]
+CONNECTION_HEADERS = [
+    'keep-alive',
+    'close',
+]
+UPGRADE_INSECURE_REQUESTS_HEADERS = ['1']
+SEC_FETCH_DEST_HEADERS = ['document']
+SEC_FETCH_MODE_HEADERS = ['navigate']
+SEC_FETCH_SITE_HEADERS = ['none']
+SEC_FETCH_USER_HEADERS = ['?1']
+
 # Proxy-Handling
 def load_proxies():
     try:
@@ -60,12 +83,23 @@ rotate_user_agents = st.sidebar.checkbox("Rotate User-Agent (random)", value=Tru
 user_agent = st.sidebar.selectbox("Choose User-Agent", USER_AGENTS)
 delay = st.sidebar.slider("Delay between requests (seconds)", min_value=0.1, max_value=5.0, value=0.5, step=0.1)
 
+def get_random_headers():
+    return {
+        'User-Agent': random.choice(USER_AGENTS) if rotate_user_agents else user_agent,
+        'Accept': random.choice(ACCEPT_HEADERS),
+        'Accept-Language': random.choice(ACCEPT_LANGUAGE_HEADERS),
+        'Accept-Encoding': random.choice(ACCEPT_ENCODING_HEADERS),
+        'Connection': random.choice(CONNECTION_HEADERS),
+        'Upgrade-Insecure-Requests': random.choice(UPGRADE_INSECURE_REQUESTS_HEADERS),
+        'Sec-Fetch-Dest': random.choice(SEC_FETCH_DEST_HEADERS),
+        'Sec-Fetch-Mode': random.choice(SEC_FETCH_MODE_HEADERS),
+        'Sec-Fetch-Site': random.choice(SEC_FETCH_SITE_HEADERS),
+        'Sec-Fetch-User': random.choice(SEC_FETCH_USER_HEADERS),
+    }
+
 def is_shadowbanned(username, proxy=None, proxy_index=None):
     url = f"https://www.reddit.com/user/{username}/about.json"
-    if rotate_user_agents:
-        headers = {'User-Agent': random.choice(USER_AGENTS)}
-    else:
-        headers = {'User-Agent': user_agent}
+    headers = get_random_headers()
     proxy_attempts = 0
     max_proxy_attempts = len(proxies) if proxies else 1
     current_proxy_index = proxy_index if proxy_index is not None else 0
