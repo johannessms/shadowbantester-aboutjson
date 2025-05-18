@@ -42,17 +42,20 @@ def get_proxy(index):
 def get_random_user_agent():
     return random.choice(USER_AGENTS)
 
+# User-Agent Auswahl und Delay-Slider in der UI
+st.sidebar.header("Request Settings")
+user_agent = st.sidebar.selectbox("User-Agent wählen", USER_AGENTS)
+delay = st.sidebar.slider("Delay zwischen Requests (Sekunden)", min_value=0.1, max_value=5.0, value=0.5, step=0.1)
+
 def is_shadowbanned(username, proxy=None, proxy_index=None):
     url = f"https://www.reddit.com/user/{username}/about.json"
-    headers = {'User-Agent': get_random_user_agent()}  # Zufälliger User-Agent für jeden Request
+    headers = {'User-Agent': user_agent}  # Verwende den gewählten User-Agent
     proxy_attempts = 0
     max_proxy_attempts = len(proxies) if proxies else 1
     current_proxy_index = proxy_index if proxy_index is not None else 0
     
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            # Bei jedem Versuch neuen User-Agent verwenden
-            headers['User-Agent'] = get_random_user_agent()
             response = requests.get(url, headers=headers, timeout=5, proxies=proxy)
             if response.status_code == 404:
                 return {
@@ -132,7 +135,7 @@ def process_batch(usernames, progress_bar, use_proxies=True):
     total = len(usernames)
     def worker(username, proxy, proxy_index):
         result = is_shadowbanned(username, proxy, proxy_index)
-        time.sleep(0.2)
+        time.sleep(delay)  # Verwende das gewählte Delay
         return result
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_username = {
