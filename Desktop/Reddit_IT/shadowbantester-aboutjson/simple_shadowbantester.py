@@ -56,9 +56,9 @@ def get_random_user_agent():
 
 # User-Agent Auswahl und Delay-Slider in der UI
 st.sidebar.header("Request Settings")
-rotate_user_agents = st.sidebar.checkbox("User-Agent rotieren (zufällig)", value=True)
-user_agent = st.sidebar.selectbox("User-Agent wählen", USER_AGENTS)
-delay = st.sidebar.slider("Delay zwischen Requests (Sekunden)", min_value=0.1, max_value=5.0, value=0.5, step=0.1)
+rotate_user_agents = st.sidebar.checkbox("Rotate User-Agent (random)", value=True)
+user_agent = st.sidebar.selectbox("Choose User-Agent", USER_AGENTS)
+delay = st.sidebar.slider("Delay between requests (seconds)", min_value=0.1, max_value=5.0, value=0.5, step=0.1)
 
 def is_shadowbanned(username, proxy=None, proxy_index=None):
     url = f"https://www.reddit.com/user/{username}/about.json"
